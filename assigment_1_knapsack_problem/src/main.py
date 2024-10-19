@@ -1,3 +1,5 @@
+from load_data import load_data
+
 def main():
     pass
 
