@@ -26,5 +26,5 @@ pip install -r requirements.txt
 ### Run the code
 
 ```bash
-python src/main.py
+python -m knapsack
 ```
