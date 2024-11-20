@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 
+
 def load_data(file_name: str) -> tuple[int, int, pd.DataFrame]:
     """
     Load data for knapsack problem from a file
@@ -9,7 +10,8 @@ def load_data(file_name: str) -> tuple[int, int, pd.DataFrame]:
         file_name: Name of the file to load data from
 
     Returns:
-        A tuple containing the number of items, the capacity of the knapsack, and a DataFrame containing the weight and value of each item
+        A tuple containing the number of items, the capacity of the knapsack,
+        and a DataFrame containing the weight and value of each item
     """
 
     data_path = os.path.join("data", file_name)
@@ -23,6 +25,11 @@ def load_data(file_name: str) -> tuple[int, int, pd.DataFrame]:
 
     # Load the data into a DataFrame
     # Each row contains the weight and value of an item
-    data = pd.read_csv(data_path, skiprows=1, delimiter=" ", header=None, names=["weight", "value"])
+    data = pd.read_csv(
+        data_path,
+        skiprows=1,
+        delimiter=" ",
+        header=None,
+        names=["weight", "value"])
 
     return num_items, capacity, data
