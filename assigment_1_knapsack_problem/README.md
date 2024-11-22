@@ -26,5 +26,17 @@ pip install -r requirements.txt
 ### Run the code
 
 ```bash
-python -m knapsack
+python -m knapsack --<parameter_name>=<parameter_value>
+```
+
+Example:
+
+```bash
+python -m knapsack --population_size=100 --generations=100 --mutation_rate=0.001 --input_file_name=low-dimensional/f10_l-d_kp_20_879
+```
+
+You can check the available parameters by running:
+
+```bash
+python -m knapsack --help
 ```
