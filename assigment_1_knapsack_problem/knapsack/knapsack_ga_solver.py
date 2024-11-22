@@ -123,8 +123,11 @@ class KnapsackGASolver:
 
     def _tournament_selection(self) -> List[Knapsack]:
         """Tournament selection method"""
-        parents = np.random.choice(self.population, size=2)
-        return sorted(parents, key=self._evaluate_fitness, reverse=True)[:2]
+        selected_indices = np.random.choice(len(self.population), size=2, replace=False)
+        selected_parents = [self.population[i] for i in selected_indices]
+        fitness_values = [self._evaluate_fitness(k) for k in selected_parents]
+        best_indices = np.argpartition(fitness_values, -2)[-2:]
+        return [selected_parents[i] for i in best_indices]
 
     def _crossover(self, parent1: Knapsack, parent2: Knapsack) -> Knapsack:
         """Perform crossover between two parents to produce an offspring"""
