@@ -14,24 +14,41 @@ class Knapsack:
         capacity: int = 0,
     ):
         self.available_items = available_items
-        self.items = (
+        self.capacity = capacity
+
+        self._items = (
             items if items is not None else np.zeros(len(available_items), dtype=int)
         )
-        self.capacity = capacity
+        self._total_weight = None
+        self._total_value = None
+
+    @property
+    def items(self):
+        return self._items
+
+    @items.setter
+    def items(self, value):
+        self._items = value
+        self._total_weight = None
+        self._total_value = None
 
     @property
     def total_weight(self) -> int:
         """Total weight of the items in the knapsack"""
-        return np.sum(
-            self.items * np.array([item.weight for item in self.available_items])
-        )
+        if self._total_weight is None:
+            self._total_weight = np.sum(
+                self.items * np.array([item.weight for item in self.available_items])
+            )
+        return self._total_weight
 
     @property
     def total_value(self) -> int:
         """Total value of the items in the knapsack"""
-        return np.sum(
-            self.items * np.array([item.value for item in self.available_items])
-        )
+        if self._total_value is None:
+            self._total_value = np.sum(
+                self.items * np.array([item.value for item in self.available_items])
+            )
+        return self._total_value
 
     @property
     def is_overweight(self) -> bool:
@@ -47,6 +64,8 @@ class Knapsack:
     def add_item(self, item: Item):
         """Add an item to the knapsack"""
         self.items[self.available_items.index(item)] = 1
+        self._total_weight = None
+        self._total_value = None
 
     def __str__(self):
         return (
