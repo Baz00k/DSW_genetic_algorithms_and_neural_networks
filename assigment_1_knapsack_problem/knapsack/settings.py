@@ -46,6 +46,7 @@ class Settings(BaseSettings):
         examples=[
             KnapsackGASolver.SelectionType.ROULETTE_WHEEL,
             KnapsackGASolver.SelectionType.TOURNAMENT,
+            KnapsackGASolver.SelectionType.RANK,
         ],
         default=KnapsackGASolver.SelectionType.ROULETTE_WHEEL,
     )

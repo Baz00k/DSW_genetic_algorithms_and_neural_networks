@@ -22,6 +22,7 @@ class KnapsackGASolver:
 
         ROULETTE_WHEEL = "roulette_wheel"
         TOURNAMENT = "tournament"
+        RANK = "rank"
 
     class FitnessType(str, Enum):
         """Types of fitness operations"""
@@ -73,6 +74,7 @@ class KnapsackGASolver:
         self.selection_methods = {
             self.SelectionType.ROULETTE_WHEEL: self._roulette_wheel_selection,
             self.SelectionType.TOURNAMENT: self._tournament_selection,
+            self.SelectionType.RANK: self._rank_selection,
         }
 
         self.crossover_methods = {
@@ -133,6 +135,20 @@ class KnapsackGASolver:
         fitness_values = [self._evaluate_fitness(k) for k in selected_parents]
         best_indices = np.argpartition(fitness_values, -2)[-2:]
         return [selected_parents[i] for i in best_indices]
+
+    def _rank_selection(self) -> List[Knapsack]:
+        """Rank selection method"""
+        fitness_values = np.array([self._evaluate_fitness(k) for k in self.population])
+        ranks = np.argsort(fitness_values) + 1
+        total_rank = np.sum(ranks)
+        probabilities = ranks / total_rank
+        cumulative_probabilities = np.cumsum(probabilities)
+
+        def select_one():
+            r = np.random.rand()
+            return self.population[np.searchsorted(cumulative_probabilities, r)]
+
+        return [select_one(), select_one()]
 
     def _crossover(self, parent1: Knapsack, parent2: Knapsack) -> Knapsack:
         """Perform crossover between two parents to produce an offspring"""
