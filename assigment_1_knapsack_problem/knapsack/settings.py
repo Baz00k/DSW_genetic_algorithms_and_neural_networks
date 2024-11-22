@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     population_size: int = Field(
         description="Number of individuals in the population",
         examples=[10, 20, 50],
-        default=10,
+        default=100,
         ge=2,
     )
     generations: int = Field(
@@ -36,9 +36,10 @@ class Settings(BaseSettings):
     )
     mutation_rate: float = Field(
         description="Probability of a mutation occurring",
-        examples=[0.1, 0.2, 0.5],
-        default=0.1,
+        examples=[0.1, 0.01, 0.001],
+        default=0.01,
         ge=0.0,
+        le=1.0,
     )
     selection_type: KnapsackGASolver.SelectionType = Field(
         description="Type of selection to use",
