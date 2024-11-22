@@ -26,10 +26,7 @@ def load_data(file_name: str) -> tuple[int, int, pd.DataFrame]:
     # Load the data into a DataFrame
     # Each row contains the weight and value of an item
     data = pd.read_csv(
-        data_path,
-        skiprows=1,
-        delimiter=" ",
-        header=None,
-        names=["weight", "value"])
+        data_path, skiprows=1, delimiter=" ", header=None, names=["value", "weight"]
+    )
 
     return num_items, capacity, data
