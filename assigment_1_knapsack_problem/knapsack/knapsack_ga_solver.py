@@ -113,7 +113,13 @@ class KnapsackGASolver:
         fitness_values = np.array([self._evaluate_fitness(k) for k in self.population])
         total_fitness = np.sum(fitness_values)
         probabilities = fitness_values / total_fitness
-        return np.random.choice(self.population, size=2, p=probabilities)
+        cumulative_probabilities = np.cumsum(probabilities)
+
+        def select_one():
+            r = np.random.rand()
+            return self.population[np.searchsorted(cumulative_probabilities, r)]
+
+        return [select_one(), select_one()]
 
     def _tournament_selection(self) -> List[Knapsack]:
         """Tournament selection method"""
