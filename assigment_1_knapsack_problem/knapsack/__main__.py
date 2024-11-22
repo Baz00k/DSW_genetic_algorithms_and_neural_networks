@@ -36,6 +36,7 @@ def main():
         mutation_rate=settings.mutation_rate,
         selection_type=settings.selection_type,
         fitness_type=settings.fitness_type,
+        plot_fitness=settings.enable_plots,
     )
 
     solution = solver.solve()

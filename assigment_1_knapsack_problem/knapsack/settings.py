@@ -56,3 +56,7 @@ class Settings(BaseSettings):
         ],
         default=KnapsackGASolver.FitnessType.LINEAR,
     )
+    enable_plots: bool = Field(
+        description="Whether to enable plotting graphs",
+        default=False,
+    )

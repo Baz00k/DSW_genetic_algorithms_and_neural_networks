@@ -2,6 +2,7 @@ from typing import List
 from enum import Enum
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
 from .item import Item
 from .knapsack import Knapsack
@@ -38,6 +39,7 @@ class KnapsackGASolver:
         mutation_rate: float,
         selection_type: "KnapsackGASolver.SelectionType",
         fitness_type: "KnapsackGASolver.FitnessType",
+        plot_fitness: bool = False,
     ):
         """
         Initialize the solver
@@ -51,6 +53,7 @@ class KnapsackGASolver:
             mutation_rate: Probability of a mutation occurring
             selection_type: Type of selection to use
             fitness_type: Type of fitness function to use
+            plot_fitness: Whether to plot the fitness over generations
         """
         self.available_items = [
             Item(row.weight, row.value) for row in data.itertuples()
@@ -62,6 +65,8 @@ class KnapsackGASolver:
         self.mutation_rate = mutation_rate
         self.selection_type = selection_type
         self.fitness_type = fitness_type
+        self.enable_plots = plot_fitness
+        self.fitness_history = []
 
         self.population: List[Knapsack] = []
 
@@ -172,12 +177,28 @@ class KnapsackGASolver:
         mutation_mask = np.random.rand(len(knapsack.items)) < self.mutation_rate
         knapsack.items = np.logical_xor(knapsack.items, mutation_mask).astype(int)
 
+    def _record_fitness(self):
+        """Record the fitness of the current population"""
+        fitness_values = [self._evaluate_fitness(k) for k in self.population]
+        self.fitness_history.append(max(fitness_values))
+
+    def _plot_fitness(self):
+        """Plot the fitness over generations"""
+        plt.plot(self.fitness_history)
+        plt.xlabel("Generation")
+        plt.ylabel("Fitness")
+        plt.title("Fitness over Generations")
+        plt.show()
+
     def solve(self) -> Knapsack:
         """Solve the knapsack problem using a genetic algorithm"""
         self._initialize_population()
 
         for _ in range(self.generations):
             new_population = []
+
+            if self.enable_plots:
+                self._record_fitness()
 
             for _ in range(self.population_size // 2):
                 parent1, parent2 = self._select_parents()
@@ -188,6 +209,9 @@ class KnapsackGASolver:
                 new_population.extend([child1, child2])
 
             self.population = new_population
+
+        if self.enable_plots:
+            self._plot_fitness()
 
         best_knapsack = max(self.population, key=self._evaluate_fitness)
 
