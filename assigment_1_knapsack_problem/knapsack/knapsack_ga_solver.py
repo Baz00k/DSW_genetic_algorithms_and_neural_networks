@@ -2,7 +2,6 @@ from typing import List
 from enum import Enum
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 
 from .item import Item
 from .knapsack import Knapsack
@@ -40,7 +39,6 @@ class KnapsackGASolver:
         mutation_rate: float,
         selection_type: "KnapsackGASolver.SelectionType",
         fitness_type: "KnapsackGASolver.FitnessType",
-        plot_fitness: bool = False,
     ):
         """
         Initialize the solver
@@ -54,7 +52,6 @@ class KnapsackGASolver:
             mutation_rate: Probability of a mutation occurring
             selection_type: Type of selection to use
             fitness_type: Type of fitness function to use
-            plot_fitness: Whether to plot the fitness over generations
         """
         self.available_items = [
             Item(row.weight, row.value) for row in data.itertuples()
@@ -66,7 +63,6 @@ class KnapsackGASolver:
         self.mutation_rate = mutation_rate
         self.selection_type = selection_type
         self.fitness_type = fitness_type
-        self.enable_plots = plot_fitness
         self.fitness_history = []
 
         self.population: List[Knapsack] = []
@@ -119,6 +115,13 @@ class KnapsackGASolver:
         """Roulette wheel selection method"""
         fitness_values = np.array([self._evaluate_fitness(k) for k in self.population])
         total_fitness = np.sum(fitness_values)
+
+        if total_fitness == 0:
+            return [
+                np.random.choice(self.population, size=1)[0],
+                np.random.choice(self.population, size=1)[0],
+            ]
+
         probabilities = fitness_values / total_fitness
         cumulative_probabilities = np.cumsum(probabilities)
 
@@ -130,25 +133,16 @@ class KnapsackGASolver:
 
     def _tournament_selection(self) -> List[Knapsack]:
         """Tournament selection method"""
-        selected_indices = np.random.choice(len(self.population), size=2, replace=False)
-        selected_parents = [self.population[i] for i in selected_indices]
-        fitness_values = [self._evaluate_fitness(k) for k in selected_parents]
-        best_indices = np.argpartition(fitness_values, -2)[-2:]
-        return [selected_parents[i] for i in best_indices]
+        tournament_size = 2
+        tournament = np.random.choice(self.population, size=tournament_size)
+        return sorted(tournament, key=self._evaluate_fitness, reverse=True)[:2]
 
     def _rank_selection(self) -> List[Knapsack]:
         """Rank selection method"""
-        fitness_values = np.array([self._evaluate_fitness(k) for k in self.population])
-        ranks = np.argsort(fitness_values) + 1
-        total_rank = np.sum(ranks)
-        probabilities = ranks / total_rank
-        cumulative_probabilities = np.cumsum(probabilities)
-
-        def select_one():
-            r = np.random.rand()
-            return self.population[np.searchsorted(cumulative_probabilities, r)]
-
-        return [select_one(), select_one()]
+        ranked_population = sorted(self.population, key=self._evaluate_fitness)
+        ranks = np.arange(1, len(ranked_population) + 1)
+        probabilities = ranks / np.sum(ranks)
+        return np.random.choice(ranked_population, size=2, p=probabilities)
 
     def _crossover(self, parent1: Knapsack, parent2: Knapsack) -> Knapsack:
         """Perform crossover between two parents to produce an offspring"""
@@ -194,17 +188,9 @@ class KnapsackGASolver:
         knapsack.items = np.logical_xor(knapsack.items, mutation_mask).astype(int)
 
     def _record_fitness(self):
-        """Record the fitness of the current population"""
-        fitness_values = [self._evaluate_fitness(k) for k in self.population]
-        self.fitness_history.append(max(fitness_values))
-
-    def _plot_fitness(self):
-        """Plot the fitness over generations"""
-        plt.plot(self.fitness_history)
-        plt.xlabel("Generation")
-        plt.ylabel("Fitness")
-        plt.title("Fitness over Generations")
-        plt.show()
+        """Record the fitness of the best individual in the population"""
+        best_knapsack = max(self.population, key=self._evaluate_fitness)
+        self.fitness_history.append(self._evaluate_fitness(best_knapsack))
 
     def solve(self) -> Knapsack:
         """Solve the knapsack problem using a genetic algorithm"""
@@ -212,9 +198,6 @@ class KnapsackGASolver:
 
         for _ in range(self.generations):
             new_population = []
-
-            if self.enable_plots:
-                self._record_fitness()
 
             for _ in range(self.population_size // 2):
                 parent1, parent2 = self._select_parents()
@@ -224,10 +207,8 @@ class KnapsackGASolver:
                 self._mutate(child2)
                 new_population.extend([child1, child2])
 
+            self._record_fitness()
             self.population = new_population
-
-        if self.enable_plots:
-            self._plot_fitness()
 
         best_knapsack = max(self.population, key=self._evaluate_fitness)
 

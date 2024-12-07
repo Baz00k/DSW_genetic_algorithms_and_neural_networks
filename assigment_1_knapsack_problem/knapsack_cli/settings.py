@@ -1,7 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
 
-from .knapsack_ga_solver import KnapsackGASolver
+from knapsack.knapsack_ga_solver import KnapsackGASolver
 
 
 class Settings(BaseSettings):
@@ -60,5 +60,9 @@ class Settings(BaseSettings):
     )
     enable_plots: bool = Field(
         description="Whether to enable plotting graphs",
+        default=False,
+    )
+    compare_solvers: bool = Field(
+        description="Whether to compare solvers with different evolutionary strategies",
         default=False,
     )
