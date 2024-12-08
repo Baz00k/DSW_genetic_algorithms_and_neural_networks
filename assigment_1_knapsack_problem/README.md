@@ -13,19 +13,10 @@ You can check the project requirements in the [PDF file](./docs/AG.pdf).
 ### Create a virtual environment
 
 ```bash
-python3 -m venv .venv
-
-*or
-
 python -m venv .venv
 
-*and after:
-
-source .venv/bin/activate
-
-*or
-
-source .venv/Scripts/activate
+source .venv/bin/activate # Linux/Mac
+source .venv/Scripts/activate # Windows
 
 ```
 
