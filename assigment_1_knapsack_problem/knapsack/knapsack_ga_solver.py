@@ -1,5 +1,6 @@
 from typing import List
 from enum import Enum
+from tqdm import tqdm
 import pandas as pd
 import numpy as np
 
@@ -65,7 +66,7 @@ class KnapsackGASolver:
         self.fitness_type = fitness_type
         self.fitness_history = []
 
-        self.population: List[Knapsack] = []
+        self.population: np.ndarray = []
 
         self.selection_methods = {
             self.SelectionType.ROULETTE_WHEEL: self._roulette_wheel_selection,
@@ -101,7 +102,7 @@ class KnapsackGASolver:
                         remaining_capacity -= item.weight
 
             knapsack = Knapsack(self.available_items, items, self.max_capacity)
-            self.population.append(knapsack)
+            self.population = np.append(self.population, knapsack)
 
     def _evaluate_fitness(self, knapsack: Knapsack) -> int:
         """Evaluate the fitness of a knapsack"""
@@ -116,33 +117,36 @@ class KnapsackGASolver:
         fitness_values = np.array([self._evaluate_fitness(k) for k in self.population])
         total_fitness = np.sum(fitness_values)
 
+        # Avoid division by zero
         if total_fitness == 0:
-            return [
-                np.random.choice(self.population, size=1)[0],
-                np.random.choice(self.population, size=1)[0],
-            ]
+            return np.random.choice(self.population, size=self.population_size)
 
         probabilities = fitness_values / total_fitness
-        cumulative_probabilities = np.cumsum(probabilities)
 
-        def select_one():
-            r = np.random.rand()
-            return self.population[np.searchsorted(cumulative_probabilities, r)]
-
-        return [select_one(), select_one()]
+        return np.random.choice(
+            self.population, size=self.population_size, p=probabilities
+        )
 
     def _tournament_selection(self) -> List[Knapsack]:
         """Tournament selection method"""
-        tournament_size = 2
-        tournament = np.random.choice(self.population, size=tournament_size)
-        return sorted(tournament, key=self._evaluate_fitness, reverse=True)[:2]
+        tournament_size = 5
+
+        new_population = []
+        for _ in range(self.population_size):
+            tournament = np.random.choice(self.population, size=tournament_size)
+            winner = max(tournament, key=self._evaluate_fitness)
+            new_population.append(winner)
+
+        return new_population
 
     def _rank_selection(self) -> List[Knapsack]:
         """Rank selection method"""
         ranked_population = sorted(self.population, key=self._evaluate_fitness)
         ranks = np.arange(1, len(ranked_population) + 1)
         probabilities = ranks / np.sum(ranks)
-        return np.random.choice(ranked_population, size=2, p=probabilities)
+        return np.random.choice(
+            ranked_population, size=self.population_size, p=probabilities
+        )
 
     def _crossover(self, parent1: Knapsack, parent2: Knapsack) -> Knapsack:
         """Perform crossover between two parents to produce an offspring"""
@@ -192,23 +196,27 @@ class KnapsackGASolver:
         best_knapsack = max(self.population, key=self._evaluate_fitness)
         self.fitness_history.append(self._evaluate_fitness(best_knapsack))
 
+    def _select_parents(self) -> List[Knapsack]:
+        """Return two random parents from the population"""
+        return np.random.choice(self.population, size=2, replace=False)
+
+    def _select_survivors(self) -> List[Knapsack]:
+        """Select survivors to limit the population size based on the selection type"""
+        return self.selection_methods[self.selection_type]()
+
     def solve(self) -> Knapsack:
         """Solve the knapsack problem using a genetic algorithm"""
         self._initialize_population()
 
-        for _ in range(self.generations):
-            new_population = []
-
-            for _ in range(self.population_size // 2):
+        for _ in tqdm(range(self.generations)):
+            for _ in range(self.population_size):
                 parent1, parent2 = self._select_parents()
-                child1 = self._crossover(parent1, parent2)
-                child2 = self._crossover(parent1, parent2)
-                self._mutate(child1)
-                self._mutate(child2)
-                new_population.extend([child1, child2])
+                child = self._crossover(parent1, parent2)
+                self._mutate(child)
+                self.population = np.append(self.population, child)
 
+            self.population = self._select_survivors()
             self._record_fitness()
-            self.population = new_population
 
         best_knapsack = max(self.population, key=self._evaluate_fitness)
 
