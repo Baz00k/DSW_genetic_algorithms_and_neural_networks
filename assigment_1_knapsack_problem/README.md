@@ -14,7 +14,19 @@ You can check the project requirements in the [PDF file](./docs/AG.pdf).
 
 ```bash
 python3 -m venv .venv
+
+*or
+
+python -m venv .venv
+
+*and after:
+
 source .venv/bin/activate
+
+*or
+
+source .venv/Scripts/activate
+
 ```
 
 ### Install the requirements
@@ -26,17 +38,17 @@ pip install -r requirements.txt
 ### Run the code
 
 ```bash
-python -m knapsack --<parameter_name>=<parameter_value>
+python -m knapsack_cli --<parameter_name>=<parameter_value>
 ```
 
 Example:
 
 ```bash
-python -m knapsack --population_size=100 --generations=100 --mutation_rate=0.001 --input_file_name=low-dimensional/f10_l-d_kp_20_879
+python -m knapsack_cli --population_size=100 --generations=100 --mutation_rate=0.001 --input_file_name=low-dimensional/f10_l-d_kp_20_879
 ```
 
 You can check the available parameters by running:
 
 ```bash
-python -m knapsack --help
+python -m knapsack_cli --help
 ```
