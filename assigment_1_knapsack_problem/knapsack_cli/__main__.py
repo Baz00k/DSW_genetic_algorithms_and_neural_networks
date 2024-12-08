@@ -82,15 +82,15 @@ def compare_solvers(settings: Settings):
                 if solution is not None:
                     solutions.append(solution)
 
-                if settings.enable_plots:
-                    fitness_histories.append(solver.fitness_history)
-                    labels.append(
-                        f"{crossover_type} - {selection_type} - {fitness_type}"
-                    )
+                    if settings.enable_plots:
+                        fitness_histories.append(solver.fitness_history)
+                        labels.append(
+                            f"{crossover_type} - {selection_type} - {fitness_type}"
+                        )
 
     print("Best solutions found:")
-    for solution in solutions:
-        print(solution)
+    for solution, label in zip(solutions, labels):
+        print(f"{label}: {solution}")
 
     if settings.enable_plots:
         plot_fitness_histories(fitness_histories, labels)
