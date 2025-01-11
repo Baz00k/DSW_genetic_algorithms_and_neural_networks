@@ -1,4 +1,6 @@
+from matplotlib import pyplot as plt
 from matplotlib.colors import ListedColormap
+import numpy as np
 
 
 def plot_decision_regions(X, y, classifier, resolution=0.02):
