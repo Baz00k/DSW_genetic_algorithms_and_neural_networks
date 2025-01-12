@@ -1,8 +1,7 @@
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
-
+from load_data import get_iris_binary_data  # Importuj funkcję z pliku load_data.py
 
 # Implementacja klasy AdalineSGD
 class AdalineSGD:
@@ -63,7 +62,6 @@ class AdalineSGD:
     def predict(self, X):
         return np.where(self.activation(X) >= 0.0, 1, -1)
 
-
 # Funkcja do wizualizacji granic decyzyjnych
 def plot_decision_regions(X, y, classifier, resolution=0.02):
     markers = ('o', 'x')
@@ -87,17 +85,8 @@ def plot_decision_regions(X, y, classifier, resolution=0.02):
                     alpha=0.8, c=colors[idx],
                     marker=markers[idx], label=f"Klasa {cl}")
 
-
-# Wczytanie danych Iris
-url = "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data"
-df = pd.read_csv(url, header=None)
-
-# Wybieramy tylko dwie klasy: Iris-setosa i Iris-versicolor
-df = df[df[4].isin(['Iris-setosa', 'Iris-versicolor'])]
-
-# Ekstrakcja cech i etykiet
-X = df.iloc[:, [0, 2]].values  # Długość działki i długość płatka
-y = np.where(df[4] == 'Iris-setosa', -1, 1)  # Konwersja etykiet na -1 i 1
+# Wczytanie danych Iris za pomocą funkcji z pliku load_data.py
+X, y = get_iris_binary_data()
 
 # Wytrenowanie modelu AdalineSGD
 adaline = AdalineSGD(eta=0.01, n_iter=15, random_state=1)
